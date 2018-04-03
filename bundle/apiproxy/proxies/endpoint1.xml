@@ -1,0 +1,70 @@
+<ProxyEndpoint name='endpoint1'>
+  <Description>Proxy for Java callout for XML Cipher</Description>
+  <HTTPProxyConnection>
+    <BasePath>/xmlcipher</BasePath>
+    <Properties/>
+    <VirtualHost>secure</VirtualHost>
+  </HTTPProxyConnection>
+
+  <FaultRules/>
+
+  <PreFlow name="PreFlow">
+      <Request/>
+      <Response>
+      </Response>
+  </PreFlow>
+
+  <PostFlow name="PostFlow">
+      <Request/>
+      <Response>
+      </Response>
+  </PostFlow>
+
+  <Flows>
+    <Flow name='encrypt'>
+      <Request>
+        <Step>
+          <Condition>NOT((request.header.content-type =| "text/xml") OR (request.header.content-type =| "application/xml" ))</Condition>
+          <Name>RF-InvalidRequest</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step><Name>Java-XmlCipher-Encrypt</Name></Step>
+        <Step><Name>AM-EncryptionResponse</Name></Step>
+      </Response>
+      <Condition>(proxy.pathsuffix ~ "/encrypt") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name='decrypt'>
+      <Request>
+        <Step>
+          <Condition>NOT((request.header.content-type =| "text/xml") OR (request.header.content-type =| "application/xml" ))</Condition>
+          <Name>RF-InvalidRequest</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step><Name>Java-XmlCipher-Decrypt</Name></Step>
+        <Step><Name>AM-DecryptionResponse</Name></Step>
+      </Response>
+      <Condition>(proxy.pathsuffix ~ "/decrypt") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name='unknown'>
+      <!--
+           applies as a "default" flow, in case none of the conditions
+           for the above flows evaluated to true.
+      -->
+      <Description>Unknown request</Description>
+      <Request>
+        <Step><Name>RaiseFault-UnknownRequest</Name></Step>
+      </Request>
+      <Response/>
+    </Flow>
+
+  </Flows>
+
+  <RouteRule name='LoopbackRoute'>
+    <!-- no target! no backend call -->
+  </RouteRule>
+
+</ProxyEndpoint>

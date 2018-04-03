@@ -1,0 +1,38 @@
+<order>
+  <customer customerNumber="0815A4711">
+    <name>Michael Sonntag</name>
+    <address>
+      <street>Altenbergerstr. 69</street>
+      <ZIP>4040</ZIP>
+      <city>Linz</city>
+      <province>Upper Austria</province>
+      <country>Austria</country>
+    </address>
+  </customer>
+  <articles>
+    <line>
+      <quantity unit="piece">30</quantity>
+      <product productNumber="9907">XML editing widget</product>
+      <price currency="EUR">0.10</price>
+    </line>
+    <line>
+      <quantity unit="litre">5</quantity>
+      <product productNumber="007">Super juice</product>
+      <price currency="HUF">500</price>
+    </line>
+  </articles>
+  <delivery>
+    <deliveryaddress>
+      <name>Michael Sonntag</name>
+      <address>
+        <street>Auf der Wies 18</street>
+      </address>
+    </deliveryaddress>
+  </delivery>
+  <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Element"><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/><ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+<xenc:EncryptedKey><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#kw-tripledes"/><xenc:CipherData><xenc:CipherValue>ABuAz4R5NL1Lj0gge4wDxpm9OM/RHUGIt7afT6K/3v0=</xenc:CipherValue></xenc:CipherData></xenc:EncryptedKey></ds:KeyInfo><xenc:CipherData><xenc:CipherValue>D0rt2+gZuUhs/TUJ0vWbDK1+H1YESQztMm+KRA4cCivGv/iRhgLmbznYcBdUuVbaPHLfAXhVL892&#xD;
+7QphINvrL7TcpzEuuFxrXY3K7xbNLquFBEpxOFs0Ize6NUaQ7yYmOUxQIdMTPNfcmieERXfv38d0&#xD;
+2+iZm/26HRFrySZwgUeQvSfWPU9tZpHOua0UtlgfdWbfFh106oO7QKol+iBdc73COaEkj8V9vQwK&#xD;
+cV7BoRyhBRzbqtYhehQfvO/bTgQtyV+jh8US7WYTjJe+jQuWhbSuqv2STTObBr312HeHEzixPS2O&#xD;
+F0Ds6idWbCj7KL4r1p1gMnjnp8ZxBfkKbMRcHg==</xenc:CipherValue></xenc:CipherData></xenc:EncryptedData>
+</order>
