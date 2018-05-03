@@ -1,13 +1,22 @@
 # Java XMLCipher Callout
 
-This directory contains the Java source code and pom.xml file required to
-compile a simple Java callout for Apigee Edge, that performs an XMLCipher encryption.
+This directory contains the Java source code and pom.xml file required
+to compile a simple Java callout for Apigee Edge, that performs an
+XMLCipher encryption or decryption. It encrypts or decrypts one element
+within an XML document, and returns the resulting document.
 
 ## Disclaimer
 
 This example is not an official Google product, nor is it part of an official Google product.
 
-## Notes
+## License
+
+This material is copyright 2018, Google Inc.
+and is licensed under the Apache 2.0 license. See the [LICENSE](LICENSE) file.
+
+This code is open source but you don't need to compile it in order to use it. 
+
+## Details
 
 There are two callout classes,
 
@@ -34,9 +43,16 @@ See [the example API proxy included here](./bundle) for the implementation.
 curl -i https://${ORG}-${ENV}.apigee.net/xmlcipher/encrypt?xpath=/order/payment  -H content-type:application/xml --data-binary @./sample-data/order.xml
 ```
 
-During Encryption, the callout generates a random AES key, and a random TripleDES key. It sets the 3DES key into a context variable.  You need this 3DES key in order to decrypt. (If you wanted to, you could modify the callout to accept a specific 3DES key, rather than randomly generating one.)
+During Encryption, the callout generates a random AES key, and a random
+TripleDES key. It sets the 3DES key into a context variable. You need
+this 3DES key in order to decrypt. (If you wanted to, you could modify
+the callout to accept a specific 3DES key, rather than randomly
+generating one.)
 
-As implemented in THIS example API Proxy, the response will include an HTTP header  containing the HEX-encoded string that represents the key bytes, filled with the value of that context variable. Supposing the input XML looks like this:
+As implemented in THIS example API Proxy, the response will include an
+HTTP header containing the HEX-encoded string that represents the key
+bytes, filled with the value of that context variable. Supposing the
+input XML looks like this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -135,13 +151,6 @@ curl -i https://${ORG}-${ENV}.apigee.net/xmlcipher/decrypt?key=8f73a15e2f8a4ab35
 Note the `key` query param here is filled with the value returned in the `keybytes` header in the response to the call to /encrypt. The output here is the original XML.
 
 
-
-## License
-
-This material is copyright 2018, Google Inc.
-and is licensed under the Apache 2.0 license. See the [LICENSE](LICENSE) file.
-
-
 ## Bugs
 
-none?
+None, as far as I know! 
