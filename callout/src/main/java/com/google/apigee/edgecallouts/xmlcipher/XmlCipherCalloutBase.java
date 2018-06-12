@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc.
+// Copyright 2018 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public abstract class XmlCipherCalloutBase {
         pretty = pretty.toLowerCase();
         return pretty.equals("true");
     }
-    
+
     protected boolean getDebug() {
         String value = (String) this.properties.get("debug");
         if (value == null) return false;
@@ -129,6 +129,6 @@ public abstract class XmlCipherCalloutBase {
             msgCtxt.setVariable(varName("error"), error);
         }
     }
-    
+
 
 }

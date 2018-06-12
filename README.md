@@ -11,10 +11,10 @@ This example is not an official Google product, nor is it part of an official Go
 
 ## License
 
-This material is copyright 2018, Google Inc.
+This material is copyright 2018, Google LLC.
 and is licensed under the Apache 2.0 license. See the [LICENSE](LICENSE) file.
 
-This code is open source but you don't need to compile it in order to use it. 
+This code is open source but you don't need to compile it in order to use it.
 
 ## Details
 
@@ -153,4 +153,4 @@ Note the `key` query param here is filled with the value returned in the `keybyt
 
 ## Bugs
 
-None, as far as I know! 
+None, as far as I know!
