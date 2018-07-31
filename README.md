@@ -2,7 +2,7 @@
 
 This directory contains the Java source code and pom.xml file required
 to compile a simple Java callout for Apigee Edge, that performs an
-XMLCipher encryption or decryption. It encrypts or decrypts one element
+XMLCipher encryption or decryption, via [Apache XML Security for Java](http://santuario.apache.org/). This callout encrypts or decrypts one element
 within an XML document, and returns the resulting document.
 
 ## Disclaimer
@@ -20,7 +20,7 @@ This code is open source but you don't need to compile it in order to use it.
 
 There are two callout classes,
 
-* com.google.apigee.edgecallouts.xmlcipher.Encrypt - encrypts the xpath
+* com.google.apigee.edgecallouts.xmlcipher.Encrypt - encrypts the element specified by an xpath
 * com.google.apigee.edgecallouts.xmlcipher.Decrypt - decrypts the encrypted element
 
 
@@ -43,16 +43,27 @@ See [the example API proxy included here](./bundle) for the implementation.
 curl -i https://${ORG}-${ENV}.apigee.net/xmlcipher/encrypt?xpath=/order/payment  -H content-type:application/xml --data-binary @./sample-data/order.xml
 ```
 
-During Encryption, the callout generates a random AES key, and a random
-TripleDES key. It sets the 3DES key into a context variable. You need
-this 3DES key in order to decrypt. (If you wanted to, you could modify
-the callout to accept a specific 3DES key, rather than randomly
-generating one.)
+During Encryption, the callout:
+
+* generates a random 128-bit AES key
+* Uses that key with Cipher-Block Chaining to encrypt the chosen element (http://www.w3.org/2001/04/xmlenc#aes128-cbc).
+* generates a random TripleDES key
+* uses that key to encrypt the AES key
+* embeds that enciphered key into the ciphertext. (This is all just standard [Apache XML Security for Java](http://santuario.apache.org/).)
+* sets the 3DES key into a context variable.
+
+You need this 3DES key in order to decrypt. If you wanted to, you could
+modify the callout to accept a specific 3DES key, rather than randomly
+generating one.
 
 As implemented in THIS example API Proxy, the response will include an
 HTTP header containing the HEX-encoded string that represents the key
-bytes, filled with the value of that context variable. Supposing the
-input XML looks like this:
+bytes, filled with the value of that context variable.
+
+
+### Encryption: Example
+
+Supposing the input XML looks like this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -153,4 +164,4 @@ Note the `key` query param here is filled with the value returned in the `keybyt
 
 ## Bugs
 
-None, as far as I know!
+None reported.
