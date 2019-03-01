@@ -2,7 +2,8 @@
 
 This directory contains the Java source code and pom.xml file required
 to compile a simple Java callout for Apigee Edge, that performs an
-XMLCipher encryption or decryption, via [Apache XML Security for Java](http://santuario.apache.org/). This callout encrypts or decrypts one element
+XML encryption or decryption, according to [https://www.w3.org/TR/xmlenc-core1/](https://www.w3.org/TR/xmlenc-core1/), via [Apache XML Security for Java](http://santuario.apache.org/).
+This callout encrypts or decrypts one element
 within an XML document, and returns the resulting document.
 
 ## Disclaimer
@@ -23,14 +24,6 @@ There are two callout classes,
 * com.google.apigee.edgecallouts.xmlcipher.Encrypt - encrypts the element specified by an xpath
 * com.google.apigee.edgecallouts.xmlcipher.Decrypt - decrypts the encrypted element
 
-
-## Dependencies
-
-Make sure these JARs are available as resources in the  proxy or in the environment or organization.
-
-* xmlsec-2.1.1.jar
-* commons-lang3-3.7.jar
-* commons-codec-1.6.jar
 
 
 ## Usage
