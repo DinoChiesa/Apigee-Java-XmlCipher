@@ -4,5 +4,5 @@
     <Property name='keybytes'>{request.queryparam.key}</Property>
   </Properties>
   <ClassName>com.google.apigee.edgecallouts.xmlcipher.Decrypt</ClassName>
-  <ResourceURL>java://edge-xmlcipher-1.0.1.jar</ResourceURL>
+  <ResourceURL>java://apigee-xmlcipher-20200415.jar</ResourceURL>
 </JavaCallout>

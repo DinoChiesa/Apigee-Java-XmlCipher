@@ -56,7 +56,7 @@
       -->
       <Description>Unknown request</Description>
       <Request>
-        <Step><Name>RaiseFault-UnknownRequest</Name></Step>
+        <Step><Name>RF-UnknownRequest</Name></Step>
       </Request>
       <Response/>
     </Flow>

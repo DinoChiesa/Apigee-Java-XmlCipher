@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2018-2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
 
 package com.google.apigee.edgecallouts.xmlcipher;
 
-import com.google.apigee.util.XmlUtils;
 import com.apigee.flow.message.MessageContext;
+import com.google.apigee.util.XmlUtils;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +29,7 @@ public abstract class XmlCipherCalloutBase {
     private Map properties; // read-only
     private static final String variableReferencePatternString = "(.*?)\\{([^\\{\\} ]+?)\\}(.*?)";
     private static final Pattern variableReferencePattern = Pattern.compile(variableReferencePatternString);
+  private static final Pattern commonErrorPattern = Pattern.compile("^(.+?)[:;] (.+)$");
 
     static {
         org.apache.xml.security.Init.init();
@@ -117,18 +120,22 @@ public abstract class XmlCipherCalloutBase {
         return sb.toString();
     }
 
-    protected void setExceptionVariables(Exception exc1, MessageContext msgCtxt) {
-        String error = exc1.toString();
-        msgCtxt.setVariable(varName("exception"), error);
-        System.out.printf("Exception: %s\n", error);
-        int ch = error.lastIndexOf(':');
-        if (ch >= 0) {
-            msgCtxt.setVariable(varName("error"), error.substring(ch+2).trim());
-        }
-        else {
-            msgCtxt.setVariable(varName("error"), error);
-        }
-    }
+  protected static String getStackTraceAsString(Throwable t) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    t.printStackTrace(pw);
+    return sw.toString();
+  }
 
+  protected void setExceptionVariables(Exception exc1, MessageContext msgCtxt) {
+    String error = exc1.toString().replaceAll("\n", " ");
+    msgCtxt.setVariable(varName("exception"), error);
+    Matcher matcher = commonErrorPattern.matcher(error);
+    if (matcher.matches()) {
+      msgCtxt.setVariable(varName("error"), matcher.group(2));
+    } else {
+      msgCtxt.setVariable(varName("error"), error);
+    }
+  }
 
 }
