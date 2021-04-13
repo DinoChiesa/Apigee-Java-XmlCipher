@@ -1,4 +1,4 @@
-// Copyright 2018-2020 Google LLC
+// Copyright 2018-2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@
  *  limitations under the License.
  *
  */
-package com.google.apigee.edgecallouts.xmlcipher;
+package com.google.apigee.callouts.xmlcipher;
 
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
@@ -46,8 +46,6 @@ import javax.crypto.SecretKey;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.xml.security.encryption.EncryptedData;
 import org.apache.xml.security.encryption.EncryptedKey;
 import org.apache.xml.security.encryption.XMLCipher;
@@ -61,24 +59,16 @@ public class Encrypt extends XmlCipherCalloutBase implements Execution {
     super(properties);
   }
 
-  private static SecretKey generateKeyEncryptionKey() throws Exception {
-    String jceAlgorithmName = "DESede";
-    KeyGenerator keyGenerator = KeyGenerator.getInstance(jceAlgorithmName);
-    SecretKey kek = keyGenerator.generateKey();
-    return kek;
-  }
-
   private static SecretKey generateDataEncryptionKey() throws Exception {
     KeyGenerator nonThreadSafe_AESKeyGenerator = KeyGenerator.getInstance("AES");
     nonThreadSafe_AESKeyGenerator.init(128);
     return nonThreadSafe_AESKeyGenerator.generateKey();
   }
 
-  private byte[] execute0(Document document, String xpathPath) throws Exception {
+  private void execute0(Document document, String xpathPath, SecretKey keyEncryptingKey)
+      throws Exception {
     // 1. generate keys
     Key symmetricKey = generateDataEncryptionKey();
-    Key keyEncryptingKey = generateKeyEncryptionKey();
-    byte[] keyBytes = keyEncryptingKey.getEncoded();
 
     // 2. encrypt the key
     XMLCipher keyCipher = XMLCipher.getInstance(XMLCipher.TRIPLEDES_KeyWrap);
@@ -109,22 +99,28 @@ public class Encrypt extends XmlCipherCalloutBase implements Execution {
     encrypt the complete element and not only it's content. This replaces
     the existing element with the encrypted form. */
     xmlCipher.doFinal(document, toEncrypt, false);
-
-    return keyBytes;
   }
 
   public ExecutionResult execute(final MessageContext msgCtxt, final ExecutionContext execContext) {
     try {
       Document document = getDocument(msgCtxt);
       String xpathPath = getSimpleRequiredProperty("xpath", msgCtxt);
-      byte[] keyBytes = execute0(document, xpathPath);
+
+      KeyEncryptingKeyResult keyResult = getKeyEncryptingKey(msgCtxt, true);
+
+      execute0(document, xpathPath, keyResult.keyEncryptingKey);
+
       String result = XmlUtils.toString(document, getPretty(msgCtxt));
       String outputVar = getOutputVar(msgCtxt);
       msgCtxt.setVariable(outputVar, result);
-      String encodedHex = Hex.encodeHexString(keyBytes);
-      msgCtxt.setVariable(varName("keybytes_hex"), encodedHex);
-      String encodedB64 = Base64.encodeBase64URLSafeString(keyBytes);
-      msgCtxt.setVariable(varName("keybytes_b64"), encodedB64);
+
+      if (keyResult.isGenerated) {
+        byte[] keyBytes = keyResult.keyEncryptingKey.getEncoded();
+        msgCtxt.setVariable(varName("keybytes_hex"), encodeString(keyBytes, EncodingType.BASE16));
+        msgCtxt.setVariable(varName("keybytes_b64"), encodeString(keyBytes, EncodingType.BASE64));
+        msgCtxt.setVariable(
+            varName("keybytes_b64url"), encodeString(keyBytes, EncodingType.BASE64URL));
+      }
       return ExecutionResult.SUCCESS;
     } catch (javax.xml.xpath.XPathExpressionException texc1) {
       setExceptionVariables(texc1, msgCtxt);

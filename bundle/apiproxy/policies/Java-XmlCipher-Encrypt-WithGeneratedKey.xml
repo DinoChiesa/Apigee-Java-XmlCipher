@@ -1,0 +1,8 @@
+<JavaCallout name='Java-XmlCipher-Encrypt-WithGeneratedKey'>
+  <Properties>
+    <Property name='source'>message.content</Property>
+    <Property name='xpath'>{request.queryparam.xpath}</Property>
+  </Properties>
+  <ClassName>com.google.apigee.callouts.xmlcipher.Encrypt</ClassName>
+  <ResourceURL>java://apigee-xmlcipher-20210412.jar</ResourceURL>
+</JavaCallout>

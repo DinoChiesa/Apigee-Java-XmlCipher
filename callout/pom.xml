@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.google.apigee.edgecallouts</groupId>
   <artifactId>apigee-xmlcipher</artifactId>
-  <version>20200415</version>
-  <name>EdgeJavaXmlCipher</name>
+  <version>20210412</version>
+  <name>ApigeeJavaXmlCipher</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
   <properties>
@@ -139,10 +139,10 @@ do it manually by running these commands:
                     <include name="${project.artifactId}-${project.version}.jar"/>
                     <!-- copy any required dependencies tht are not
                     already included in the Edge runtime: -->
-                    <exclude name="lib/message-flow-1.0.0.jar"/>
+                    <include name="lib/*.jar"/>
                     <exclude name="lib/message-flow-1.0.0.jar"/>
                     <exclude name="lib/expressions-1.0.0.jar"/>
-                    <include name="lib/slf4j-api-*.jar"/>
+                    <exclude name="lib/slf4j-api-*.jar"/>
                   </fileset>
                   <mapper type="flatten"/>
                 </copy>
@@ -168,7 +168,7 @@ do it manually by running these commands:
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.0.5</version>
+                  <version>3.5.0</version>
                 </requireMavenVersion>
               </rules>
             </configuration>

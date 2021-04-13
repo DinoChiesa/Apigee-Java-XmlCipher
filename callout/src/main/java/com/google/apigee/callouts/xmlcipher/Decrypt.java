@@ -1,4 +1,4 @@
-// Copyright 2018-2020 Google LLC
+// Copyright 2018-2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,19 +33,15 @@
  *
  */
 
-package com.google.apigee.edgecallouts.xmlcipher;
+package com.google.apigee.callouts.xmlcipher;
 
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.MessageContext;
 import com.google.apigee.util.XmlUtils;
-import java.security.Key;
 import java.util.Map;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESedeKeySpec;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.xml.security.encryption.XMLCipher;
 import org.apache.xml.security.utils.EncryptionConstants;
 import org.w3c.dom.Document;
@@ -57,14 +53,7 @@ public class Decrypt extends XmlCipherCalloutBase implements Execution {
     super(properties);
   }
 
-  private static SecretKey loadKeyEncryptionKey(final byte[] keyBytes) throws Exception {
-    SecretKeyFactory skf = SecretKeyFactory.getInstance("DESede");
-    DESedeKeySpec keySpec = new DESedeKeySpec(keyBytes);
-    SecretKey key = skf.generateSecret(keySpec);
-    return key;
-  }
-
-  private void execute0(Document document, byte[] keyBytes) throws Exception {
+  private void execute0(Document document, SecretKey kek) throws Exception {
 
     /* Find the encrypted data element: retrieve the first encrypted
     element by its name and namespace */
@@ -74,9 +63,6 @@ public class Decrypt extends XmlCipherCalloutBase implements Execution {
                 .getElementsByTagNameNS(
                     EncryptionConstants.EncryptionSpecNS, EncryptionConstants._TAG_ENCRYPTEDDATA)
                 .item(0);
-
-    /* Load the master key to be used for decrypting the xml data encryption key */
-    Key kek = loadKeyEncryptionKey(keyBytes);
 
     /* The key to be used for decrypting xml data would be obtained from the
     keyinfo of the EncrypteData using the kek. */
@@ -92,9 +78,9 @@ public class Decrypt extends XmlCipherCalloutBase implements Execution {
   public ExecutionResult execute(final MessageContext msgCtxt, final ExecutionContext execContext) {
     try {
       Document document = getDocument(msgCtxt);
-      String keyBytesHexString = getSimpleRequiredProperty("keybytes", msgCtxt);
-      byte[] keyBytes = Hex.decodeHex(keyBytesHexString.toCharArray());
-      execute0(document, keyBytes);
+      KeyEncryptingKeyResult keyResult = getKeyEncryptingKey(msgCtxt, false);
+
+      execute0(document, keyResult.keyEncryptingKey);
       String result = XmlUtils.toString(document, getPretty(msgCtxt));
       String outputVar = getOutputVar(msgCtxt);
       msgCtxt.setVariable(outputVar, result);

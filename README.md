@@ -1,7 +1,7 @@
 # Java XMLCipher Callout
 
 This directory contains the Java source code and pom.xml file required
-to compile a simple Java callout for Apigee Edge, that performs an
+to compile a simple Java callout for Apigee, that performs an
 XML encryption or decryption, according to [https://www.w3.org/TR/xmlenc-core1/](https://www.w3.org/TR/xmlenc-core1/), via [Apache XML Security for Java](http://santuario.apache.org/).
 This callout encrypts or decrypts one element
 within an XML document, and returns the resulting document.
@@ -12,7 +12,7 @@ This example is not an official Google product, nor is it part of an official Go
 
 ## License
 
-This material is copyright 2018-2020, Google LLC.
+This material is copyright 2018-2021, Google LLC.
 and is licensed under the Apache 2.0 license. See the [LICENSE](LICENSE) file.
 
 This code is open source but you don't need to compile it in order to use it.
@@ -21,9 +21,8 @@ This code is open source but you don't need to compile it in order to use it.
 
 There are two callout classes,
 
-* com.google.apigee.edgecallouts.xmlcipher.Encrypt - encrypts the element specified by an xpath
-* com.google.apigee.edgecallouts.xmlcipher.Decrypt - decrypts the encrypted element
-
+* com.google.apigee.callouts.xmlcipher.Encrypt - encrypts the element specified by an xpath
+* com.google.apigee.callouts.xmlcipher.Decrypt - decrypts the encrypted element
 
 
 ## Usage
@@ -32,29 +31,51 @@ See [the example API proxy included here](./bundle) for the implementation.
 
 ### Encryption
 
-```
-curl -i https://${ORG}-${ENV}.apigee.net/xmlcipher/encrypt?xpath=/order/payment  -H content-type:application/xml --data-binary @./sample-data/order.xml
-```
-
 During Encryption, the callout:
 
 * generates a random 128-bit AES key
 * Uses that key with Cipher-Block Chaining to encrypt the chosen element (http://www.w3.org/2001/04/xmlenc#aes128-cbc).
-* generates a random TripleDES key
-* uses that key to encrypt the AES key
+* generates a random TripleDES (3DES) key, or de-serializes the 3DES key you provide. This is called the "key encrypting key".
+* uses that key-encrypting-key to encrypt the AES key
 * embeds that enciphered key into the ciphertext. (This is all just standard [Apache XML Security for Java](http://santuario.apache.org/).)
-* sets the 3DES key into a context variable.
+* if it was generated, sets the 3DES key into a context variable.
 
-You need this 3DES key in order to decrypt. If you wanted to, you could
-modify the callout to accept a specific 3DES key, rather than randomly
-generating one.
-
-As implemented in THIS example API Proxy, the response will include an
-HTTP header containing the HEX-encoded string that represents the key
-bytes, filled with the value of that context variable.
+You need this 3DES key in order to decrypt.
 
 
-### Encryption: Example
+Use these properties to configure the callouts:
+
+| property name  | meaning                                          |
+| -------------- | ------------------------------------------------ |
+| `kek`          | key-encrypting-key. An encoded version of the key.  See also `kek-encoding`.  This is required for `Decrypt`, optional for `Encrypt`. In the case of encryption if you do not specify a kek, the callout will randomly generate one for you. |
+| `kek-encoding` | The encoding to use to decode the `kek`.  One of: Base16, Bae64, Base64url.  Default: Base16 |
+| `source`       | The content to encrypt or decrypt.  Usually `message.content`. |
+| `xpath`        | The xpath of the element to encrypt.  This is used only with the `Encrypt` callout. |
+
+
+### Example
+
+This repo includes an example API Proxy, which demonstrates hwo to encrypt and decrypt.
+
+The encrypt flow in the proxy sends an HTTP header in the response
+that contains the HEX-encoded string that represents the key-encrypting-key
+bytes.
+
+To invoke the proxy, use something like this:
+
+```
+curl -i $endpoint/xmlcipher/encrypt1?xpath=/order/payment  -H content-type:application/xml --data-binary @./sample-data/order.xml
+```
+
+... where `$endpoint` holds the endpoint for the org + environment where you have imported and deployed the proxy. One of these:
+```
+# Apigee Edge
+endpoint=https://${ORG}-${ENV}.apigee.net
+
+# Apigee X
+endpoint=https://my-custom-hostname-for-apigee.net
+
+```
 
 Supposing the input XML looks like this:
 
@@ -145,6 +166,11 @@ cV7BoRyhBRzbqtYhehQfvO/bTgQtyV+jh8US7WYTjJe+jQuWhbSuqv2STTObBr312HeHEzixPS2O&#xD
 F0Ds6idWbCj7KL4r1p1gMnjnp8ZxBfkKbMRcHg==</xenc:CipherValue></xenc:CipherData></xenc:EncryptedData>
 </order>
 ```
+
+
+Notice the keybytes  HTTP header in the response.
+
+
 
 To Decrypt, you must pass the payload returned by the encryption step, along with the key, in a query param. Like so:
 

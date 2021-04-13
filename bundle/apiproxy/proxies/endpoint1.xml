@@ -7,32 +7,74 @@
   </HTTPProxyConnection>
 
   <FaultRules/>
+  <DefaultFaultRule name="fault-rule">
+    <Step>
+      <Name>AM-InjectProxyRevisionHeader</Name>
+    </Step>
+    <AlwaysEnforce/>
+  </DefaultFaultRule>
 
   <PreFlow name="PreFlow">
-      <Request/>
-      <Response>
-      </Response>
+    <Request/>
+    <Response>
+      <Step>
+        <Name>AM-CleanResponseHeaders</Name>
+      </Step>
+      <Step>
+        <Name>AM-InjectProxyRevisionHeader</Name>
+      </Step>
+    </Response>
   </PreFlow>
 
   <PostFlow name="PostFlow">
-      <Request/>
-      <Response>
-      </Response>
+    <Request/>
+    <Response>
+    </Response>
   </PostFlow>
 
   <Flows>
-    <Flow name='encrypt'>
+    <Flow name='encrypt1'>
       <Request>
         <Step>
           <Condition>NOT((request.header.content-type =| "text/xml") OR (request.header.content-type =| "application/xml" ))</Condition>
           <Name>RF-InvalidRequest</Name>
         </Step>
+        <Step>
+          <Condition>request.queryparam.kek != null</Condition>
+          <Name>RF-InappropriateKey</Name>
+        </Step>
       </Request>
       <Response>
-        <Step><Name>Java-XmlCipher-Encrypt</Name></Step>
-        <Step><Name>AM-EncryptionResponse</Name></Step>
+        <Step>
+          <Name>Java-XmlCipher-Encrypt-WithGeneratedKey</Name>
+        </Step>
+        <Step>
+          <Name>AM-EncryptionResponse</Name>
+        </Step>
       </Response>
-      <Condition>(proxy.pathsuffix ~ "/encrypt") and (request.verb = "POST")</Condition>
+      <Condition>(proxy.pathsuffix ~ "/encrypt1") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name='encrypt2'>
+      <Request>
+        <Step>
+          <Condition>NOT((request.header.content-type =| "text/xml") OR (request.header.content-type =| "application/xml" ))</Condition>
+          <Name>RF-InvalidRequest</Name>
+        </Step>
+        <Step>
+          <Condition>request.queryparam.kek = null</Condition>
+          <Name>RF-MissingKey</Name>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>Java-XmlCipher-Encrypt-WithProvidedKey</Name>
+        </Step>
+        <Step>
+          <Name>AM-EncryptionResponse</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix ~ "/encrypt2") and (request.verb = "POST")</Condition>
     </Flow>
 
     <Flow name='decrypt'>
@@ -41,22 +83,32 @@
           <Condition>NOT((request.header.content-type =| "text/xml") OR (request.header.content-type =| "application/xml" ))</Condition>
           <Name>RF-InvalidRequest</Name>
         </Step>
+        <Step>
+          <Condition>request.queryparam.kek = null</Condition>
+          <Name>RF-MissingKey</Name>
+        </Step>
       </Request>
       <Response>
-        <Step><Name>Java-XmlCipher-Decrypt</Name></Step>
-        <Step><Name>AM-DecryptionResponse</Name></Step>
+        <Step>
+          <Name>Java-XmlCipher-Decrypt</Name>
+        </Step>
+        <Step>
+          <Name>AM-DecryptionResponse</Name>
+        </Step>
       </Response>
       <Condition>(proxy.pathsuffix ~ "/decrypt") and (request.verb = "POST")</Condition>
     </Flow>
 
     <Flow name='unknown'>
       <!--
-           applies as a "default" flow, in case none of the conditions
-           for the above flows evaluated to true.
+          applies as a "default" flow, in case none of the conditions
+          for the above flows evaluated to true.
       -->
       <Description>Unknown request</Description>
       <Request>
-        <Step><Name>RF-UnknownRequest</Name></Step>
+        <Step>
+          <Name>RF-UnknownRequest</Name>
+        </Step>
       </Request>
       <Response/>
     </Flow>
