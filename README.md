@@ -176,10 +176,10 @@ Notice the keybytes  HTTP header in the response.
 To Decrypt, you must pass the payload returned by the encryption step, along with the key, in a query param. Like so:
 
 ```
-curl -i https://${ORG}-${ENV}.apigee.net/xmlcipher/decrypt?key=8f73a15e2f8a4ab354109d83ba9b1957c2bc32ecd6feb920  -H content-type:application/xml --data-binary @./sample-data/order-encrypted.xml
+curl -i $endpoint/xmlcipher/decrypt?key=8f73a15e2f8a4ab354109d83ba9b1957c2bc32ecd6feb920  -H content-type:application/xml --data-binary @./sample-data/order-encrypted.xml
 ```
 
-Note the `key` query param here is filled with the value returned in the `keybytes` header in the response to the call to /encrypt. The output here is the original XML.
+Note the `key` query param here is filled with the value returned in the `keybytes` header in the response to the call to /encrypt. The output from this command will be the original XML.
 
 
 ## Bugs
