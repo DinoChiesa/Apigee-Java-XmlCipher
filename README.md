@@ -34,14 +34,15 @@ See [the example API proxy included here](./bundle) for the implementation.
 During Encryption, the callout:
 
 * generates a random 128-bit AES key
-* Uses that key with Cipher-Block Chaining to encrypt the chosen element (http://www.w3.org/2001/04/xmlenc#aes128-cbc).
+* Uses that key with Cipher-Block Chaining to encrypt the chosen element. The [EncryptedData element](https://www.w3.org/TR/2002/REC-xmlenc-core-20021210/Overview.html#sec-Usage) uses Algorithm= http://www.w3.org/2001/04/xmlenc#aes128-cbc ].
 * generates a random TripleDES (3DES) key, or de-serializes the 3DES key you provide. This is called the "key encrypting key".
-* uses that key-encrypting-key to encrypt the AES key
+* uses that key-encrypting-key to encrypt the AES key. The EncryptedKey element uses Algorithm= http://www.w3.org/2001/04/xmlenc#kw-tripledes .
 * embeds that enciphered key into the ciphertext. (This is all just standard [Apache XML Security for Java](http://santuario.apache.org/).)
 * if it was generated, sets the 3DES key into a context variable.
 
 You need this 3DES key in order to decrypt.
 
+This callout does not support RSA-based key transport, at this time. 
 
 Use these properties to configure the callouts:
 
@@ -183,4 +184,4 @@ Note the `key` query param here is filled with the value returned in the `keybyt
 
 ## Bugs
 
-None reported.
+* The callout does not support [RSA Key Transports](https://www.w3.org/TR/2002/REC-xmlenc-core-20021210/Overview.html#sec-Alg-KeyTransport).
